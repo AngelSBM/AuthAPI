@@ -17,9 +17,31 @@ namespace Auth.DataAccessLayer.Repositories
             this._authContext = context;
         }
 
+        public void Register(User newUser)
+        {
+            _authContext.Set<User>().Add(newUser);
+        }
+
+        public User GetUserByEmail(string email)
+        {
+            return _authContext.Users.Where(user => user.Email == email).FirstOrDefault();
+        }
+
+        public bool UserExists(string email)
+        {
+            return _authContext.Users.Any(user => user.Email == email);
+        }
+
+
         public IEnumerable<User> GetAllUsers()
         {
             return _authContext.Users.ToList();
         }
+
+        public void SaveChanges()
+        {
+            _authContext.SaveChanges();
+        }
+
     }
 }

@@ -11,8 +11,4 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.5" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Abstractions\Services\" />
-  </ItemGroup>
-
 </Project>

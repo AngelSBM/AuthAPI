@@ -10,5 +10,10 @@ namespace Auth.DataAccessLayer.Abstractions.Repos
     public interface IUserRepository
     {
         public IEnumerable<User> GetAllUsers();
+        public void Register(User newUser);
+        public User GetUserByEmail(string email);
+        public bool UserExists(string email);
+        public void SaveChanges();
+
     }
 }

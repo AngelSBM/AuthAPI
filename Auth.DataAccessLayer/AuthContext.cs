@@ -34,6 +34,7 @@ namespace Auth.DataAccessLayer
                 entity.Property(e => e.Email).HasColumnName("EMAIL");
                 entity.Property(e => e.Password).HasColumnName("USER_PASSWORD");
                 entity.Property(e => e.PublicId).HasColumnName("PUBLIC_ID");
+                entity.Property(e => e.Salt).HasColumnName("SALT");
             } );
 
         }        

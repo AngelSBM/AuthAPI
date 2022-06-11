@@ -14,6 +14,7 @@ namespace Auth.DataAccessLayer.Entities
         public string Phone { get; set; }
         public DateTime BirthDate { get; set; }
         public string Email { get; set; }
+        public byte[]? Salt { get; set; }
         public string Password { get; set; }
         public Guid PublicId { get; set; }
     }

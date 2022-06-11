@@ -1,5 +1,7 @@
 ﻿using Auth.LogicLayer.Abstractions;
+using Auth.LogicLayer.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace Auth.ClientLayer.Controllers
 {
@@ -14,25 +16,37 @@ namespace Auth.ClientLayer.Controllers
             this._userService = userService;
         }
 
-        [HttpGet("GetUsers")]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public IActionResult GetAllUsers()
-        {
-            var users = _userService.getUsers();
-
-            try
-            {
-                return new OkObjectResult(users);
-            }
-            catch (Exception)
-            {
-
-                throw;
-            }
-            
-        }
 
         //TODO: create funcionality which allows users registration
+        [HttpPost("Register")]
+        public IActionResult Register(UserRegisterDTO newUser)
+        {
+            try
+            {
+                _userService.RegisterUser(newUser);
+                return new OkObjectResult(true);
+            }
+            catch (Exception e)
+            {
+                return new BadRequestObjectResult(e.Message);
+            }                        
+        }
+
+        [HttpPost("Login")]
+        public IActionResult Login(UserLoginDTO user)
+        {
+            try
+            {
+                _userService.Login(user);
+
+                return new OkObjectResult("You are logged!");
+            }
+            catch (Exception e)
+            {
+
+                return new BadRequestObjectResult(e.Message);
+            }            
+        }
 
     }
 }
