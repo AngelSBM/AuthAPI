@@ -12,6 +12,6 @@ namespace Auth.LogicLayer.Abstractions
     {
         public IEnumerable<UserDTO> getUsers();
         public UserDTO RegisterUser(UserRegisterDTO newUser);
-        public void Login(UserLoginDTO user);
+        public string Login(UserLoginDTO user);
     }
 }

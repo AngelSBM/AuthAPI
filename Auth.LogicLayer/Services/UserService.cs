@@ -12,17 +12,24 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Text.RegularExpressions;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.Extensions.Configuration;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Auth.LogicLayer.Services
 {
     public class UserService : IUserService
     {
-        public readonly IUserRepository _userRepo;
-        public readonly IMapper mapper;
-        public UserService(IUserRepository userRepo, IMapper mapper)
+        private readonly IUserRepository _userRepo;
+        private readonly IMapper mapper;
+        private readonly IConfiguration _configuration;
+
+        public UserService(IUserRepository userRepo, IMapper mapper, IConfiguration configuration)            
         {
             this._userRepo = userRepo;
             this.mapper = mapper;
+            this._configuration = configuration;
         }
 
         public IEnumerable<UserDTO> getUsers()
@@ -54,7 +61,7 @@ namespace Auth.LogicLayer.Services
             return new UserDTO();
         }
 
-        public void Login(UserLoginDTO user)
+        public string Login(UserLoginDTO user)
         {
             User userDB = _userRepo.GetUserByEmail(user.Email);
             if (userDB == null)
@@ -74,6 +81,10 @@ namespace Auth.LogicLayer.Services
             {
                 throw new Exception("Incorrect password");
             }
+
+            string token = createToken(userDB);
+
+            return token;
         }
 
         private void validateNewUser(UserRegisterDTO newUser)
@@ -104,7 +115,33 @@ namespace Auth.LogicLayer.Services
                 throw new Exception("Some of the arguments for the registration are invalid!");
             }
 
-        }       
+        }
+
+
+        private string createToken(User user)
+        {
+            List<Claim> claims = new List<Claim>
+            {
+                new Claim("UID", user.PublicId.ToString()),
+            };
+
+            string secretKey = _configuration.GetSection("AppSettings:Token").Value;
+
+            var key = new SymmetricSecurityKey
+                (System.Text.Encoding.UTF8.GetBytes(secretKey));
+
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha512Signature);
+
+
+            var token = new JwtSecurityToken(
+                claims: claims,
+                expires: DateTime.Now.AddDays(1),
+                signingCredentials: creds);
+
+            string jwt = new JwtSecurityTokenHandler().WriteToken(token);
+
+            return jwt;
+        }
 
         private byte[] generateSalt()
         {

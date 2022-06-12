@@ -1,4 +1,5 @@
 ﻿using Auth.LogicLayer.Abstractions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Auth.ClientLayer.Controllers
@@ -16,6 +17,7 @@ namespace Auth.ClientLayer.Controllers
 
 
         [HttpGet("GetUsers")]
+        [Authorize]
         public IActionResult GetAllUsers()
         {
             var users = _userService.getUsers();

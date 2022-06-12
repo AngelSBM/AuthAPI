@@ -37,9 +37,12 @@ namespace Auth.ClientLayer.Controllers
         {
             try
             {
-                _userService.Login(user);
+                string token = _userService.Login(user);
 
-                return new OkObjectResult("You are logged!");
+                return new OkObjectResult(new {
+                    Message = "You are logged!",
+                    Token = token
+                });
             }
             catch (Exception e)
             {
