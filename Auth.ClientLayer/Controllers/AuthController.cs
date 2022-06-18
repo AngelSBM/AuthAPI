@@ -1,16 +1,20 @@
 ﻿using Auth.LogicLayer.Abstractions;
 using Auth.LogicLayer.DTOs;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Net.Http.Headers;
 using System.Net;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Auth.ClientLayer.Controllers
 {
 
     [ApiController]
     [Route("Auth")]
-    public class AuthController
+    public class AuthController : ControllerBase
     {
-        private readonly IUserService _userService;
+        private readonly IUserService _userService;        
         public AuthController(IUserService userService) 
         {
             this._userService = userService;
@@ -35,20 +39,43 @@ namespace Auth.ClientLayer.Controllers
         [HttpPost("Login")]
         public IActionResult Login(UserLoginDTO user)
         {
+
             try
             {
-                string token = _userService.Login(user);
+                UserCrendentialsDTO tokens = _userService.Login(user);
 
-                return new OkObjectResult(new {
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                };
+
+                Response.Cookies.Append("refreshToken", tokens.RefreshToken, cookieOptions);
+
+                var response = new OkObjectResult(new
+                {
                     Message = "You are logged!",
-                    Token = token
+                    Token = tokens.AccessToken
                 });
+
+
+                return response;
+
+
+                //response.
             }
             catch (Exception e)
             {
 
                 return new BadRequestObjectResult(e.Message);
             }            
+        }
+
+        [HttpPost("refreshToken")]        
+        [Authorize]
+        public IActionResult RefreshToken()
+        {
+            var userId = User.FindFirstValue("UID");
+            return Ok(userId);
         }
 
     }

@@ -19,11 +19,6 @@ namespace Auth.DataAccessLayer
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
-            //modelBuilder.Entity<User>()
-            //    .ToTable("dbo.USERS")  
-            //    .Property(e => e.Name).HasColumnName("NAME")
-            //    .HasKey(e => e.Id);
-
             modelBuilder.Entity<User>( entity =>
             {
                 entity.ToTable("USERS");
@@ -36,6 +31,17 @@ namespace Auth.DataAccessLayer
                 entity.Property(e => e.PublicId).HasColumnName("PUBLIC_ID");
                 entity.Property(e => e.Salt).HasColumnName("SALT");
             } );
+
+            modelBuilder.Entity<RefreshToken>(entity =>
+           {
+               entity.ToTable("USER_SESSIONS");
+               entity.HasKey(e => e.Id);
+               entity.Property(e => e.Id).HasColumnName("ID");
+               entity.Property(e => e.Token).HasColumnName("REFRESH_TOKEN");
+               entity.Property(e => e.UserId).HasColumnName("USER_ID");
+               entity.Property(e => e.CreatedAt).HasColumnName("CREATED_AT");
+               entity.Property(e => e.ExpiresAt).HasColumnName("EXPIRES_AT");
+           } );
 
         }        
     }

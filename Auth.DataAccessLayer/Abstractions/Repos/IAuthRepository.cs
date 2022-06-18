@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Auth.DataAccessLayer.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,5 +9,7 @@ namespace Auth.DataAccessLayer.Abstractions.Repos
 {
     public interface IAuthRepository
     {
+        public void CreateUserSession(User user, RefreshToken token);
+        public void SaveChanges();
     }
 }

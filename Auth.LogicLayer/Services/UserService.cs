@@ -16,20 +16,30 @@ using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Http;
 
 namespace Auth.LogicLayer.Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepo;
+        private readonly IAuthRepository _authRepo;
         private readonly IMapper mapper;
         private readonly IConfiguration _configuration;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UserService(IUserRepository userRepo, IMapper mapper, IConfiguration configuration)            
+        public UserService(
+            IUserRepository userRepo, 
+            IAuthRepository authRepo,
+            IMapper mapper, 
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor)            
         {
             this._userRepo = userRepo;
+            this._authRepo = authRepo;
             this.mapper = mapper;
             this._configuration = configuration;
+            this._httpContextAccessor = httpContextAccessor;
         }
 
         public IEnumerable<UserDTO> getUsers()
@@ -61,30 +71,58 @@ namespace Auth.LogicLayer.Services
             return new UserDTO();
         }
 
-        public string Login(UserLoginDTO user)
+        public UserCrendentialsDTO Login(UserLoginDTO user)
         {
             User userDB = _userRepo.GetUserByEmail(user.Email);
             if (userDB == null)
             {
                 throw new Exception("User not found");
             }
-
-            bool invalidPassword = user.Password == "";
-
-            if (invalidPassword) { throw new Exception("Invalid Password"); }
             
-            var hashLoginPassword = hashPassword(user.Password, userDB.Salt);               
-            
-            bool userAuthenticated = hashLoginPassword == userDB.Password;
+            var hashLoginPassword = hashPassword(user.Password, userDB.Salt);                         
 
-            if (!userAuthenticated)
+            if (!(hashLoginPassword == userDB.Password))
             {
                 throw new Exception("Incorrect password");
             }
 
-            string token = createToken(userDB);
+            string accessToken = createToken(userDB);
+            string refreshToken = createRefreshToken(userDB);
 
-            return token;
+            return new UserCrendentialsDTO
+            {
+                AccessToken = accessToken,
+                RefreshToken = refreshToken
+            };
+            
+        }
+
+
+
+        private string createRefreshToken(User user)
+        {
+            try
+            {
+                var refreshToken = new RefreshToken()
+                {
+                    Token = Guid.NewGuid(),
+                    UserId = user.Id,
+                    CreatedAt = DateTime.Now,
+                    ExpiresAt = DateTime.Now.AddDays(7),
+                };
+
+                _authRepo.CreateUserSession(user, refreshToken);
+                _authRepo.SaveChanges();
+
+                return refreshToken.Token.ToString();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
         }
 
         private void validateNewUser(UserRegisterDTO newUser)
@@ -102,7 +140,6 @@ namespace Auth.LogicLayer.Services
             }
 
             bool userExists = _userRepo.UserExists(newUser.Email);
-
             if (userExists)
             {
                 throw new Exception("User already exists!");
@@ -123,6 +160,7 @@ namespace Auth.LogicLayer.Services
             List<Claim> claims = new List<Claim>
             {
                 new Claim("UID", user.PublicId.ToString()),
+                new Claim(ClaimTypes.Role, "Admin")
             };
 
             string secretKey = _configuration.GetSection("AppSettings:Token").Value;
@@ -135,7 +173,7 @@ namespace Auth.LogicLayer.Services
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddDays(1),
+                expires: DateTime.Now.AddMinutes(5),
                 signingCredentials: creds);
 
             string jwt = new JwtSecurityTokenHandler().WriteToken(token);
