@@ -25,6 +25,7 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 
 //SERVICES
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 
 builder.Services.AddHttpContextAccessor();

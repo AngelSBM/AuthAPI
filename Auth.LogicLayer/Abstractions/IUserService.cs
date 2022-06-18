@@ -11,7 +11,5 @@ namespace Auth.LogicLayer.Abstractions
     public interface IUserService
     {
         public IEnumerable<UserDTO> getUsers();
-        public UserDTO RegisterUser(UserRegisterDTO newUser);
-        public UserCrendentialsDTO Login(UserLoginDTO user);
     }
 }

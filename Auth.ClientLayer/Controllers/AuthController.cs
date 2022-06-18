@@ -14,20 +14,19 @@ namespace Auth.ClientLayer.Controllers
     [Route("Auth")]
     public class AuthController : ControllerBase
     {
-        private readonly IUserService _userService;        
-        public AuthController(IUserService userService) 
+        private readonly IAuthService _authService;        
+        public AuthController(IAuthService _authService) 
         {
-            this._userService = userService;
+            this._authService = _authService;
         }
 
-
-        //TODO: create funcionality which allows users registration
+        
         [HttpPost("Register")]
         public IActionResult Register(UserRegisterDTO newUser)
         {
             try
             {
-                _userService.RegisterUser(newUser);
+                _authService.RegisterUser(newUser);
                 return new OkObjectResult(true);
             }
             catch (Exception e)
@@ -42,7 +41,7 @@ namespace Auth.ClientLayer.Controllers
 
             try
             {
-                UserCrendentialsDTO tokens = _userService.Login(user);
+                UserCrendentialsDTO tokens = _authService.Login(user);
 
                 var cookieOptions = new CookieOptions
                 {
