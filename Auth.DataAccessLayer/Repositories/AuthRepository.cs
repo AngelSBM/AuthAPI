@@ -22,6 +22,18 @@ namespace Auth.DataAccessLayer.Repositories
             _context.Set<RefreshToken>().Add(refreshToken);
         }
 
+        public RefreshToken findRefreshTokenByUserId(int userId)
+        {
+            var session = _context.Set<RefreshToken>().Where(rt => rt.UserId == userId).FirstOrDefault();
+
+            return session;
+        }
+
+        public void DeleteRefreshToken(RefreshToken refreshToken)
+        {
+            _context.Set<RefreshToken>().Remove(refreshToken);
+        }
+
         public void SaveChanges()
         {
             _context.SaveChanges();

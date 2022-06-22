@@ -26,7 +26,10 @@ namespace Auth.DataAccessLayer.Repositories
         {
             return _authContext.Users.Where(user => user.Email == email).FirstOrDefault();
         }
-
+        public User GetUserById(int userId)
+        {
+            return _authContext.Users.Where(user => user.Id == userId).FirstOrDefault();
+        }
         public bool UserExists(string email)
         {
             return _authContext.Users.Any(user => user.Email == email);
@@ -43,5 +46,9 @@ namespace Auth.DataAccessLayer.Repositories
             _authContext.SaveChanges();
         }
 
+        public User GetUserById(string email)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

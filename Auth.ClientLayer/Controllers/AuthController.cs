@@ -53,7 +53,7 @@ namespace Auth.ClientLayer.Controllers
                 var response = new OkObjectResult(new
                 {
                     Message = "You are logged!",
-                    Token = tokens.AccessToken
+                    AccessToken = tokens.AccessToken
                 });
 
 
@@ -73,8 +73,32 @@ namespace Auth.ClientLayer.Controllers
         [Authorize]
         public IActionResult RefreshToken()
         {
-            var userId = User.FindFirstValue("UID");
-            return Ok(userId);
+            try
+            {
+                UserCrendentialsDTO newTokens = _authService.RefreshSession();
+
+                var cookieOptions = new CookieOptions
+                {
+                    HttpOnly = true,
+                };
+
+                Response.Cookies.Append("refreshToken", newTokens.RefreshToken, cookieOptions);
+
+                var response = new OkObjectResult(new
+                {
+                    Message = "Token refreshed",
+                    AccessToken = newTokens.AccessToken
+                });
+
+                return Ok(response);
+            }
+            catch (Exception e)
+            {
+
+                throw;
+            }
+
+            
         }
 
     }

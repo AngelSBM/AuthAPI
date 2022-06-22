@@ -12,6 +12,7 @@ namespace Auth.DataAccessLayer.Abstractions.Repos
         public IEnumerable<User> GetAllUsers();
         public void Register(User newUser);
         public User GetUserByEmail(string email);
+        public User GetUserById(int userId);
         public bool UserExists(string email);
         public void SaveChanges();
 

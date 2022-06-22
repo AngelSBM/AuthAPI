@@ -94,6 +94,44 @@ namespace Auth.LogicLayer.Services
         }
 
 
+        public UserCrendentialsDTO RefreshSession()
+        {
+            var userId = int.Parse(_httpContextAccessor.HttpContext.User.FindFirst("UID")?.Value);
+            var refreshToken = _httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
+
+            validateOldSession(userId, refreshToken);
+
+            var newSessionCredentials = new UserCrendentialsDTO();
+
+            var userDB = _userRepo.GetUserById(userId);
+            newSessionCredentials.AccessToken = createToken(userDB);
+            newSessionCredentials.RefreshToken = createRefreshToken(userDB);
+
+            return newSessionCredentials;
+        }
+
+        private void validateOldSession(int userId, string refreshToken)
+        {
+            if(userId == null || refreshToken == null)
+            {
+                throw new Exception("Invalid session");
+            }
+
+            var session = _authRepo.findRefreshTokenByUserId(userId);
+            if(session.Token.ToString() != refreshToken)
+            {
+                throw new Exception("Invalid session");
+            }
+
+            if(session.ExpiresAt < DateTime.Now)
+            {
+                throw new Exception("Session expired!");
+            }
+
+            _authRepo.DeleteRefreshToken(session);
+            _authRepo.SaveChanges();
+        }
+
 
         private string createRefreshToken(User user)
         {
@@ -155,8 +193,7 @@ namespace Auth.LogicLayer.Services
         {
             List<Claim> claims = new List<Claim>
             {
-                new Claim("UID", user.PublicId.ToString()),
-                new Claim(ClaimTypes.Role, "Admin")
+                new Claim("UID", user.Id.ToString())
             };
 
             string secretKey = _configuration.GetSection("AppSettings:Token").Value;
@@ -169,7 +206,7 @@ namespace Auth.LogicLayer.Services
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(5),
+                expires: DateTime.Now.AddSeconds(30),
                 signingCredentials: creds);
 
             string jwt = new JwtSecurityTokenHandler().WriteToken(token);

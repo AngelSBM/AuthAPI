@@ -11,5 +11,6 @@ namespace Auth.LogicLayer.Abstractions
     {
         public UserDTO RegisterUser(UserRegisterDTO newUser);
         public UserCrendentialsDTO Login(UserLoginDTO user);
+        public UserCrendentialsDTO RefreshSession();
     }
 }

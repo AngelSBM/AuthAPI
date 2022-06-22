@@ -17,7 +17,7 @@ namespace Auth.ClientLayer.Controllers
 
 
         [HttpGet("GetUsers")]
-        [Authorize(Roles = "Admin")]
+        [Authorize]
         public IActionResult GetAllUsers()
         {
             var users = _userService.getUsers();
