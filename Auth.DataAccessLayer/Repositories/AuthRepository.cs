@@ -29,6 +29,13 @@ namespace Auth.DataAccessLayer.Repositories
             return session;
         }
 
+        public RefreshToken findRefreshToken(string refreshToken)
+        {
+            var session = _context.Set<RefreshToken>().Where(rt => rt.Token.ToString() == refreshToken).FirstOrDefault();
+
+            return session;
+        }
+
         public void DeleteRefreshToken(RefreshToken refreshToken)
         {
             _context.Set<RefreshToken>().Remove(refreshToken);
@@ -38,5 +45,6 @@ namespace Auth.DataAccessLayer.Repositories
         {
             _context.SaveChanges();
         }
+
     }
 }

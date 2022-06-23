@@ -11,6 +11,7 @@ namespace Auth.DataAccessLayer.Abstractions.Repos
     {
         public void CreateUserSession(User user, RefreshToken token);
         public RefreshToken findRefreshTokenByUserId(int userId);
+        public RefreshToken findRefreshToken(string refreshToken);
         public void DeleteRefreshToken(RefreshToken refreshToken);
         public void SaveChanges();
     }

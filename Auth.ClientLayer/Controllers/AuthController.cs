@@ -70,9 +70,10 @@ namespace Auth.ClientLayer.Controllers
         }
 
         [HttpPost("refreshToken")]        
-        [Authorize]
+
         public IActionResult RefreshToken()
         {
+
             try
             {
                 UserCrendentialsDTO newTokens = _authService.RefreshSession();
