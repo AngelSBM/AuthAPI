@@ -1,5 +1,6 @@
 ﻿using Auth.DataAccessLayer.Abstractions;
 using Auth.DataAccessLayer.Abstractions.Repos;
+using Auth.DataAccessLayer.Entities;
 using Auth.DataAccessLayer.Repositories;
 using System;
 using System.Collections.Generic;
@@ -15,8 +16,8 @@ namespace Auth.DataAccessLayer
 
         public UnitOfWork(
             AuthContext context,
-            IAuthRepository authRepository,
-            IUserRepository userRepository)
+            IRepository<RefreshToken> authRepository,
+            IRepository<User> userRepository)
         {
             this._globalContext = context;
 
@@ -24,8 +25,9 @@ namespace Auth.DataAccessLayer
             userRepo = userRepository;
         }
 
-        public IAuthRepository authRepo { get; set; }
-        public IUserRepository userRepo { get; set; }
+
+        public IRepository<RefreshToken> authRepo { get; set; }
+        public IRepository<User> userRepo { get; set; }
 
         
         public void BeginTransaction()

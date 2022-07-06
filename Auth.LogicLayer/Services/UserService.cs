@@ -39,7 +39,7 @@ namespace Auth.LogicLayer.Services
 
         public IEnumerable<UserDTO> getUsers()
         {
-            var usersDB = _unitOfWork.userRepo.GetAllUsers();
+            var usersDB = _unitOfWork.userRepo.GetAll();
 
             var users = mapper.Map<IEnumerable<UserDTO>>(usersDB);
             return users;

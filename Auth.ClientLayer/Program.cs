@@ -1,6 +1,7 @@
 using Auth.DataAccessLayer;
 using Auth.DataAccessLayer.Abstractions;
 using Auth.DataAccessLayer.Abstractions.Repos;
+using Auth.DataAccessLayer.Entities;
 using Auth.DataAccessLayer.Repositories;
 using Auth.LogicLayer.Abstractions;
 using Auth.LogicLayer.Helpers;
@@ -21,8 +22,8 @@ builder.Services.AddDbContext<AuthContext>(options => options.UseSqlServer(build
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
 //REPOS
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IRepository<User>, Repository<User>>();
+builder.Services.AddScoped<IRepository<RefreshToken>, Repository<RefreshToken>>();
 
 //SERVICES
 builder.Services.AddScoped<IUserService, UserService>();

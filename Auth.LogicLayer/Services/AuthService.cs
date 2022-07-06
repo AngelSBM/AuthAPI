@@ -57,7 +57,7 @@ namespace Auth.LogicLayer.Services
 
             //_userRepo.Register(userDB);
             //_userRepo.SaveChanges();
-            _unitOfWork.userRepo.Register(userDB);
+            _unitOfWork.userRepo.Add(userDB);
             _unitOfWork.Complete();
 
             return new UserDTO();
@@ -65,7 +65,7 @@ namespace Auth.LogicLayer.Services
 
         public UserCrendentialsDTO Login(UserLoginDTO user)
         {
-            User userDB = _unitOfWork.userRepo.GetUserByEmail(user.Email);
+            User userDB = _unitOfWork.userRepo.Find(user => user.Email == user.Email);
             if (userDB == null)
             {
                 throw new Exception("User not found");
@@ -94,11 +94,11 @@ namespace Auth.LogicLayer.Services
         {
             var refreshToken = _httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
 
-            var session = _unitOfWork.authRepo.findRefreshToken(refreshToken);
+            var session = _unitOfWork.authRepo.Find(session => session.Token.ToString() == refreshToken);
 
             var newSessionCredentials = new UserCrendentialsDTO();
 
-            var userDB = _unitOfWork.userRepo.GetUserById(session.UserId);
+            var userDB = _unitOfWork.userRepo.GetById(session.UserId);
             newSessionCredentials.AccessToken = createToken(userDB);
             newSessionCredentials.RefreshToken = createRefreshToken(userDB);
             deleteOldSession(session);
@@ -109,7 +109,7 @@ namespace Auth.LogicLayer.Services
         private void deleteOldSession(RefreshToken refreshToken)
         {
 
-            _unitOfWork.authRepo.DeleteRefreshToken(refreshToken);
+            _unitOfWork.authRepo.Remove(refreshToken);
             _unitOfWork.Complete();
         }
 
@@ -126,7 +126,7 @@ namespace Auth.LogicLayer.Services
                     ExpiresAt = DateTime.Now.AddDays(7),
                 };
 
-                _unitOfWork.authRepo.CreateUserSession(user, refreshToken);            
+                _unitOfWork.authRepo.Add(refreshToken);            
 
                 _unitOfWork.Complete();
 
@@ -155,7 +155,7 @@ namespace Auth.LogicLayer.Services
                 throw new Exception("Invalid email format");
             }
 
-            bool userExists = _unitOfWork.userRepo.UserExists(newUser.Email);
+            bool userExists = _unitOfWork.userRepo.Exists(user => user.Email == newUser.Email);
             if (userExists)
             {
                 throw new Exception("User already exists!");
