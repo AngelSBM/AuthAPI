@@ -18,29 +18,23 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Http;
-
+using Auth.DataAccessLayer.Abstractions;
 
 namespace Auth.LogicLayer.Services
 {
     public class AuthService : IAuthService
     {
 
-        private readonly IUserRepository _userRepo;
-        private readonly IAuthRepository _authRepo;
-        private readonly IMapper mapper;
+        IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthService(
-            IUserRepository userRepo,
-            IAuthRepository authRepo,
-            IMapper mapper,
+            IUnitOfWork unitOfWork,
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor)
         {
-            this._userRepo = userRepo;
-            this._authRepo = authRepo;
-            this.mapper = mapper;
+            this._unitOfWork = unitOfWork;
             this._configuration = configuration;
             this._httpContextAccessor = httpContextAccessor;
         }
@@ -61,15 +55,17 @@ namespace Auth.LogicLayer.Services
             userDB.Password = hashPassword(newUser.Password, userDB.Salt);
             userDB.PublicId = Guid.NewGuid();
 
-            _userRepo.Register(userDB);
-            _userRepo.SaveChanges();
+            //_userRepo.Register(userDB);
+            //_userRepo.SaveChanges();
+            _unitOfWork.userRepo.Register(userDB);
+            _unitOfWork.Complete();
 
             return new UserDTO();
         }
 
         public UserCrendentialsDTO Login(UserLoginDTO user)
         {
-            User userDB = _userRepo.GetUserByEmail(user.Email);
+            User userDB = _unitOfWork.userRepo.GetUserByEmail(user.Email);
             if (userDB == null)
             {
                 throw new Exception("User not found");
@@ -98,11 +94,11 @@ namespace Auth.LogicLayer.Services
         {
             var refreshToken = _httpContextAccessor.HttpContext.Request.Cookies["refreshToken"];
 
-            var session = _authRepo.findRefreshToken(refreshToken);
+            var session = _unitOfWork.authRepo.findRefreshToken(refreshToken);
 
             var newSessionCredentials = new UserCrendentialsDTO();
 
-            var userDB = _userRepo.GetUserById(session.UserId);
+            var userDB = _unitOfWork.userRepo.GetUserById(session.UserId);
             newSessionCredentials.AccessToken = createToken(userDB);
             newSessionCredentials.RefreshToken = createRefreshToken(userDB);
             deleteOldSession(session);
@@ -113,8 +109,8 @@ namespace Auth.LogicLayer.Services
         private void deleteOldSession(RefreshToken refreshToken)
         {
 
-            _authRepo.DeleteRefreshToken(refreshToken);
-            _authRepo.SaveChanges();
+            _unitOfWork.authRepo.DeleteRefreshToken(refreshToken);
+            _unitOfWork.Complete();
         }
 
 
@@ -130,8 +126,9 @@ namespace Auth.LogicLayer.Services
                     ExpiresAt = DateTime.Now.AddDays(7),
                 };
 
-                _authRepo.CreateUserSession(user, refreshToken);
-                _authRepo.SaveChanges();
+                _unitOfWork.authRepo.CreateUserSession(user, refreshToken);            
+
+                _unitOfWork.Complete();
 
                 return refreshToken.Token.ToString();
 
@@ -158,7 +155,7 @@ namespace Auth.LogicLayer.Services
                 throw new Exception("Invalid email format");
             }
 
-            bool userExists = _userRepo.UserExists(newUser.Email);
+            bool userExists = _unitOfWork.userRepo.UserExists(newUser.Email);
             if (userExists)
             {
                 throw new Exception("User already exists!");

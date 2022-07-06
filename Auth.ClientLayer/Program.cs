@@ -1,4 +1,5 @@
 using Auth.DataAccessLayer;
+using Auth.DataAccessLayer.Abstractions;
 using Auth.DataAccessLayer.Abstractions.Repos;
 using Auth.DataAccessLayer.Repositories;
 using Auth.LogicLayer.Abstractions;
@@ -26,6 +27,9 @@ builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 //SERVICES
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+//UNITS
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
 
 builder.Services.AddHttpContextAccessor();

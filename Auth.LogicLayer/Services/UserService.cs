@@ -17,28 +17,29 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Http;
+using Auth.DataAccessLayer.Abstractions;
 
 namespace Auth.LogicLayer.Services
 {
     public class UserService : IUserService
     {
-        private readonly IUserRepository _userRepo;        
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper mapper;
         private readonly IConfiguration _configuration;
 
         public UserService(
-            IUserRepository userRepo, 
+            IUnitOfWork unitOfWork,
             IMapper mapper, 
             IConfiguration configuration)            
         {
-            this._userRepo = userRepo;
+            this._unitOfWork = unitOfWork;
             this.mapper = mapper;
             this._configuration = configuration;
         }
 
         public IEnumerable<UserDTO> getUsers()
         {
-            var usersDB = _userRepo.GetAllUsers();
+            var usersDB = _unitOfWork.userRepo.GetAllUsers();
 
             var users = mapper.Map<IEnumerable<UserDTO>>(usersDB);
             return users;

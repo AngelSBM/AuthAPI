@@ -14,7 +14,7 @@ namespace Auth.DataAccessLayer.Abstractions.Repos
         public User GetUserByEmail(string email);
         public User GetUserById(int userId);
         public bool UserExists(string email);
-        public void SaveChanges();
 
+        public void SaveChanges();
     }
 }

@@ -35,20 +35,19 @@ namespace Auth.DataAccessLayer.Repositories
             return _authContext.Users.Any(user => user.Email == email);
         }
 
-
         public IEnumerable<User> GetAllUsers()
         {
             return _authContext.Users.ToList();
         }
 
-        public void SaveChanges()
-        {
-            _authContext.SaveChanges();
-        }
-
         public User GetUserById(string email)
         {
             throw new NotImplementedException();
+        }
+
+        public void SaveChanges()
+        {
+            _authContext.SaveChanges();
         }
     }
 }
