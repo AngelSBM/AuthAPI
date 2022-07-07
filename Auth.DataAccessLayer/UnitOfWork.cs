@@ -17,7 +17,7 @@ namespace Auth.DataAccessLayer
         public UnitOfWork(
             AuthContext context,
             IRepository<RefreshToken> authRepository,
-            IRepository<User> userRepository)
+            IUserRepository userRepository)
         {
             this._globalContext = context;
 
@@ -27,7 +27,7 @@ namespace Auth.DataAccessLayer
 
 
         public IRepository<RefreshToken> authRepo { get; set; }
-        public IRepository<User> userRepo { get; set; }
+        public IUserRepository userRepo { get; set; }
 
         
         public void BeginTransaction()

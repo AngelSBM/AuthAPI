@@ -11,7 +11,7 @@ namespace Auth.DataAccessLayer.Abstractions
     public interface IUnitOfWork
     {
         public IRepository<RefreshToken> authRepo { get; }
-        public IRepository<User> userRepo { get; }  
+        public IUserRepository userRepo { get; }  
 
         public void BeginTransaction();
         public void CommitTransaction();

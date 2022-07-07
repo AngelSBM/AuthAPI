@@ -1,5 +1,6 @@
 ﻿using Auth.DataAccessLayer.Abstractions.Repos;
 using Auth.DataAccessLayer.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,46 +9,23 @@ using System.Threading.Tasks;
 
 namespace Auth.DataAccessLayer.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : Repository<User>, IUserRepository
     {
         private readonly AuthContext _authContext;
 
-        public UserRepository(AuthContext context)
+        public UserRepository(AuthContext context) : base(context)
         {
             this._authContext = context;
         }
 
-        public void Register(User newUser)
+        /// <summary>
+        /// Get users with roles
+        /// </summary>
+        /// <returns>User</returns>
+        public IEnumerable<User> GetUsersWithRoles()
         {
-            _authContext.Set<User>().Add(newUser);
+            return _authContext.Users.Include(ur => ur.UsersRoles).ThenInclude(u => u.Role).ToList();
         }
 
-        public User GetUserByEmail(string email)
-        {
-            return _authContext.Users.Where(user => user.Email == email).FirstOrDefault();
-        }
-        public User GetUserById(int userId)
-        {
-            return _authContext.Users.Where(user => user.Id == userId).FirstOrDefault();
-        }
-        public bool UserExists(string email)
-        {
-            return _authContext.Users.Any(user => user.Email == email);
-        }
-
-        public IEnumerable<User> GetAllUsers()
-        {
-            return _authContext.Users.ToList();
-        }
-
-        public User GetUserById(string email)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SaveChanges()
-        {
-            _authContext.SaveChanges();
-        }
     }
 }

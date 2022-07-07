@@ -15,6 +15,8 @@ namespace Auth.DataAccessLayer
         }
 
         public DbSet<User> Users { get; set; }
+        public DbSet<UserRole> UsersRoles { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -42,6 +44,31 @@ namespace Auth.DataAccessLayer
                entity.Property(e => e.CreatedAt).HasColumnName("CREATED_AT");
                entity.Property(e => e.ExpiresAt).HasColumnName("EXPIRES_AT");
            } );
+
+
+            modelBuilder.Entity<Role>(entity =>
+            {
+                entity.ToTable("ROLES");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).HasColumnName("NAME");
+                entity.Property(e => e.Description).HasColumnName("DESCRIPTION");
+                entity.Property(e => e.PublicId).HasColumnName("PUBLIC_ID");
+            });
+
+            modelBuilder.Entity<UserRole>(entity =>
+            {
+                entity.ToTable("USER_ROLES");
+                entity.HasKey(entity => entity.Id);
+                entity.Property(entity => entity.Id).HasColumnName("ID");
+                entity.Property(entity => entity.UserId).HasColumnName("USERID");
+                entity.Property(entity => entity.RoleId).HasColumnName("ROLID");
+
+                entity.HasOne<User>(u => u.User).WithMany(e => e.UsersRoles);
+
+                entity.HasOne<Role>(u => u.Role).WithMany(e => e.UsersRoles);
+
+
+            });
 
         }        
     }

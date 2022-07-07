@@ -17,10 +17,10 @@ namespace Auth.ClientLayer.Controllers
 
 
         [HttpGet("GetUsers")]
-        [Authorize]
+        //[Authorize]
         public IActionResult GetAllUsers()
         {
-            var users = _userService.getUsers();
+            var users = _userService.GetUsersDetail();
 
             try
             {

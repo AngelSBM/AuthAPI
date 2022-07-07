@@ -59,8 +59,6 @@ namespace Auth.ClientLayer.Controllers
 
                 return response;
 
-
-                //response.
             }
             catch (Exception e)
             {
@@ -98,7 +96,6 @@ namespace Auth.ClientLayer.Controllers
 
                 throw;
             }
-
             
         }
 

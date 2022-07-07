@@ -9,20 +9,23 @@ using Auth.LogicLayer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Newtonsoft;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(); 
+
 builder.Services.AddDbContext<AuthContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("LocalServer")));
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
 
 //REPOS
-builder.Services.AddScoped<IRepository<User>, Repository<User>>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRepository<RefreshToken>, Repository<RefreshToken>>();
 
 //SERVICES

@@ -29,8 +29,8 @@ namespace Auth.LogicLayer.Services
 
         public UserService(
             IUnitOfWork unitOfWork,
-            IMapper mapper, 
-            IConfiguration configuration)            
+            IMapper mapper,
+            IConfiguration configuration)
         {
             this._unitOfWork = unitOfWork;
             this.mapper = mapper;
@@ -43,6 +43,17 @@ namespace Auth.LogicLayer.Services
 
             var users = mapper.Map<IEnumerable<UserDTO>>(usersDB);
             return users;
+        }
+
+        public IEnumerable<UserDetailDTO> GetUsersDetail()
+        {
+            var usersDB = _unitOfWork.userRepo.GetUsersWithRoles().ToList();
+
+            var resp = mapper.Map<IEnumerable<User>, IEnumerable<UserDetailDTO>>(usersDB);
+
+            return resp;
+            //var users = mapper.Map<IEnumerable<UserDTO>>(usersDB);
+            //return users;
         }
 
 
