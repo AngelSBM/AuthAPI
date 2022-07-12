@@ -172,7 +172,7 @@ namespace Auth.LogicLayer.Services
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.Now.AddSeconds(30),
+                expires: DateTime.Now.AddMinutes(5),
                 signingCredentials: creds);
 
             string jwt = new JwtSecurityTokenHandler().WriteToken(token);
