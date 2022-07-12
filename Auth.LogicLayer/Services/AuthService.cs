@@ -19,6 +19,7 @@ using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Http;
 using Auth.DataAccessLayer.Abstractions;
+using Auth.ClientLayer.Helpers.Exceptions;
 
 namespace Auth.LogicLayer.Services
 {
@@ -66,17 +67,17 @@ namespace Auth.LogicLayer.Services
 
         public UserCrendentialsDTO Login(UserLoginDTO user)
         {
-            User userDB = _unitOfWork.userRepo.Find(user => user.Email == user.Email);
+            User userDB = _unitOfWork.userRepo.Find(u => u.Email == user.Email);
             if (userDB == null)
             {
-                throw new Exception("User not found");
+                throw new NotFoundException("User not found");
             }
 
             var hashLoginPassword = hashPassword(user.Password, userDB.Salt);
 
             if (!(hashLoginPassword == userDB.Password))
             {
-                throw new Exception("Incorrect password");
+                throw new BadRequestException("Incorrect password");
             }
 
             string accessToken = createToken(userDB);
@@ -148,7 +149,7 @@ namespace Auth.LogicLayer.Services
             bool userExists = _unitOfWork.userRepo.Exists(user => user.Email == newUser.Email);
             if (userExists)
             {
-                throw new Exception("User already exists!");
+                throw new BadRequestException("User already exists!");
             }
 
         }

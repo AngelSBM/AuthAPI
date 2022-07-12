@@ -20,4 +20,8 @@
     <ProjectReference Include="..\Auth.DataAccessLayer\Auth.DataAccessLayer.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Helpers\Utilities\" />
+  </ItemGroup>
+
 </Project>

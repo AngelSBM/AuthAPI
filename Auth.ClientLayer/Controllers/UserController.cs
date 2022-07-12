@@ -1,6 +1,8 @@
-﻿using Auth.LogicLayer.Abstractions;
+﻿using Auth.ClientLayer.Helpers.Utilities;
+using Auth.LogicLayer.Abstractions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace Auth.ClientLayer.Controllers
 {
@@ -20,14 +22,15 @@ namespace Auth.ClientLayer.Controllers
         //[Authorize]
         public IActionResult GetAllUsers()
         {
-            var users = _userService.GetUsersDetail();
 
             try
             {
-                return new OkObjectResult(users);
+                var users = _userService.GetUsersDetail();
+                return ApiResponse.OK(users);
             }
-            catch (Exception)
+            catch (Exception e)
             {
+
 
                 throw;
             }
