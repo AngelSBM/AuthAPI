@@ -12,13 +12,14 @@ using System.Security.Cryptography;
 using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 using System.Text;
 using System.Threading.Tasks;
-using System.Text.RegularExpressions;
+using System.Net;
 using System.Security.Claims;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.Configuration;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.AspNetCore.Http;
 using Auth.DataAccessLayer.Abstractions;
+using Auth.ClientLayer.Helpers.Exceptions;
 
 namespace Auth.LogicLayer.Services
 {
@@ -27,14 +28,17 @@ namespace Auth.LogicLayer.Services
 
         IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
+        private readonly IMapper _mapper;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthService(
             IUnitOfWork unitOfWork,
+            IMapper mapper,
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor)
         {
             this._unitOfWork = unitOfWork;
+            this._mapper = mapper;  
             this._configuration = configuration;
             this._httpContextAccessor = httpContextAccessor;
         }
@@ -55,27 +59,25 @@ namespace Auth.LogicLayer.Services
             userDB.Password = hashPassword(newUser.Password, userDB.Salt);
             userDB.PublicId = Guid.NewGuid();
 
-            //_userRepo.Register(userDB);
-            //_userRepo.SaveChanges();
             _unitOfWork.userRepo.Add(userDB);
             _unitOfWork.Complete();
 
-            return new UserDTO();
+            return _mapper.Map<User, UserDTO>(userDB);
         }
 
         public UserCrendentialsDTO Login(UserLoginDTO user)
         {
-            User userDB = _unitOfWork.userRepo.Find(user => user.Email == user.Email);
+            User userDB = _unitOfWork.userRepo.Find(u => u.Email == user.Email);
             if (userDB == null)
             {
-                throw new Exception("User not found");
+                throw new NotFoundException("User not found");
             }
 
             var hashLoginPassword = hashPassword(user.Password, userDB.Salt);
 
             if (!(hashLoginPassword == userDB.Password))
             {
-                throw new Exception("Incorrect password");
+                throw new BadRequestException("Incorrect password");
             }
 
             string accessToken = createToken(userDB);
@@ -143,29 +145,11 @@ namespace Auth.LogicLayer.Services
 
         private void validateNewUser(UserRegisterDTO newUser)
         {
-            if (newUser == null)
-            {
-                throw new ArgumentNullException("Invalid data");
-            }
-
-            var regex = new Regex(@"^([\w\.\-]+)@([\w\-]+)((\.(\w){2,3})+)$");
-            Match match = regex.Match(newUser.Email);
-            if (!match.Success)
-            {
-                throw new Exception("Invalid email format");
-            }
 
             bool userExists = _unitOfWork.userRepo.Exists(user => user.Email == newUser.Email);
             if (userExists)
             {
-                throw new Exception("User already exists!");
-            }
-
-            bool invalidObject = newUser.Name == "" || newUser.LastName == "" || newUser.Password == "" || newUser.Phone == "";
-
-            if (invalidObject)
-            {
-                throw new Exception("Some of the arguments for the registration are invalid!");
+                throw new BadRequestException("User already exists!");
             }
 
         }

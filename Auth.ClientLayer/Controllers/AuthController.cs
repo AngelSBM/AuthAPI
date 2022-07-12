@@ -6,6 +6,8 @@ using Microsoft.Net.Http.Headers;
 using System.Net;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
+using Auth.ClientLayer.Helpers.Exceptions;
+using Auth.ClientLayer.Helpers.Utilities;
 
 namespace Auth.ClientLayer.Controllers
 {
@@ -26,45 +28,55 @@ namespace Auth.ClientLayer.Controllers
         {
             try
             {
-                _authService.RegisterUser(newUser);
-                return new OkObjectResult(true);
+                var  createdUser = _authService.RegisterUser(newUser);
+
+                return ApiResponse.OK(createdUser);
+
             }
+            catch (BadRequestException e)
+            {
+                var resp = ApiResponse.CreateErrorObject(e.Message);
+                return ApiResponse.BadRequest(resp); 
+            }   
             catch (Exception e)
             {
-                return new BadRequestObjectResult(e.Message);
+                var resp = ApiResponse.CreateErrorObject(e.Message);
+                return StatusCode(500, "Error interno del servidor");
             }                        
         }
 
         [HttpPost("Login")]
         public IActionResult Login(UserLoginDTO user)
-        {
-
+        {         
             try
             {
                 UserCrendentialsDTO tokens = _authService.Login(user);
 
-                var cookieOptions = new CookieOptions
-                {
-                    HttpOnly = true,
-                };
-
+                var cookieOptions = new CookieOptions { HttpOnly = true };
                 Response.Cookies.Append("refreshToken", tokens.RefreshToken, cookieOptions);
 
-                var response = new OkObjectResult(new
+
+                return ApiResponse.OK(new
                 {
                     Message = "You are logged!",
                     AccessToken = tokens.AccessToken
                 });
-
-
-                return response;
-
             }
-            catch (Exception e)
+            catch (BadRequestException e)
             {
-
-                return new BadRequestObjectResult(e.Message);
-            }            
+                var resp = ApiResponse.CreateErrorObject(e.Message);
+                return ApiResponse.BadRequest(resp);
+            }
+            catch (NotFoundException e)
+            {
+                var resp = ApiResponse.CreateErrorObject(e.Message);
+                return ApiResponse.NotFound(resp);
+            }
+            catch(Exception e)
+            {
+                var resp = ApiResponse.CreateErrorObject(e.Message);
+                return StatusCode(500, "Error interno del servidor");
+            }
         }
 
         [HttpPost("refreshToken")]        
@@ -93,8 +105,7 @@ namespace Auth.ClientLayer.Controllers
             }
             catch (Exception e)
             {
-
-                throw;
+                return new NotFoundResult();
             }
             
         }

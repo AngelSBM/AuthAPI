@@ -13,13 +13,20 @@ using Newtonsoft;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.Text;
+using FluentValidation.AspNetCore;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers(); 
+builder.Services.AddControllers()
+    .AddFluentValidation(fv =>
+    {        
+        fv.RegisterValidatorsFromAssemblyContaining<Program>();
+    });
+
+
 
 builder.Services.AddDbContext<AuthContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("LocalServer")));
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile).Assembly);
